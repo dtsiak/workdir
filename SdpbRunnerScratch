@@ -1,0 +1,170 @@
+#!/bin/bash
+#SBATCH --partition=parallel
+#SBATCH --output=TEST3.out
+#SBATCH --error=TEST3.err
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=4
+#SBATCH --mem=10GB
+
+
+#previously 72GB
+
+echo $SLURM_NTASKS_PER_NODE
+
+#module load cmake/3.10.2
+module load mpi/ofed/openmpi-1.8.8-gcc5
+module load python/3.6.4
+module load gcc/9.3.0
+dphi=$1
+D0=$2
+dimY=$3
+
+
+
+
+#--cpus-per-task=1
+#--ntasks-per-node=2
+#--ntasks=2
+
+# xml_ck_out_0.518/xml_ck_out_0.518/xml_ck_out_0.518_1.001/xml-dext0.518-Dmin1.001-spins0and1.xml
+
+
+mv /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0} /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}_new
+mkdir /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}
+
+#find /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}_new -name "*.xml" -print0 > /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}_new/xml_list.nsv
+
+
+
+#$HOME/sdpb/sdpb/sdpb/build/pvm2sdp 660 /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}_new/xml_list.nsv /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}
+
+#--findPrimalFeasible
+#
+#mpirun  $HOME/sdpb/sdpb/sdpb/build/sdpb -o /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out --noFinalCheckpoint --maxRuntime=999986400 --precision=660 --findDualFeasible --dualErrorThreshold=1e-20 --procsPerNode=4 -s /scratch/dtsiakoulias/grid2/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}
+#Uncomment following line after
+
+#HOT STARTING
+mkdir /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}.ck
+cp /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/checkpoints/* /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}.ck/
+
+mpirun  $HOME/sdpb/sdpb/sdpb/build/sdpb -o /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out --noFinalCheckpoint --maxRuntime=999986400 --precision=1100  --detectPrimalFeasibleJump --findDualFeasible --dualErrorThreshold=1e-15 --procsPerNode=20 -s  /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}
+
+echo ${dphi}_${D0}_${dimY} >> $HOME/workdir/OUTPUTS/output_${dphi}
+head -1 /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out/out.txt >> $HOME/workdir/OUTPUTS/output_${dphi}
+
+#This line needs to be checked regarding the format of the .out file
+#cp xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out TRIANG/f7l_dext${dphi}_Dmin${D0}.out 
+
+string="$(head -1 /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out/out.txt)"
+string2='terminateReason = "found dual feasible solution";'
+
+
+
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_Allowed ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_Allowed ;fi
+#if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then cp xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo 'terminateReason = "found dual feasible solution";' >  $HOME/workdir/out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_AllowedphiS ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/ALL_Not_AllowedphiS ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_Allowedsy ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_Allowedsy ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_AllowedphiY ;fi
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_AllowedphiY ;fi
+
+
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_Allowed ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_Allowed ;fi
+#if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then cp xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out  out_dphi/f7l_dext${dphi}_Dmin${D0}.out  ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo 'terminateReason = "found primal-dual optimal solution";' >   $HOME/workdir/out_dphi/f7l_dext${dphi}_Dmin${D0}.out  ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_AllowedphiS ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/ALL_Not_AllowedphiS ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_Allowedsy ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_Allowedsy ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Not_AllowedphiY ;fi
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Not_AllowedphiY ;fi
+
+
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Allowed ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Allowed ;fi
+#if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then cp xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out  out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo 'terminateReason = "primal feasible jump detected";' >   $HOME/workdir/out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_AllowedphiS ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}}, >> $HOME/workdir/OUTPUTS/ALL_AllowedphiS ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Allowedsy ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Allowedsy ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_AllowedphiY ;fi
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then echo {${dphi} , ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_AllowedphiY ;fi
+
+
+
+
+
+#HERE
+#"found primal feasible solution"
+if [ 'terminateReason = "found primal feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/output_${dphi}_Allowed ;fi
+if [ 'terminateReason = "found primal feasible solution";'  == "$(echo $string)"  ]; then echo {${dphi} , ${D0}, ${dimY}}, >> $HOME/workdir/OUTPUTS/ALL_Allowed ;fi
+#if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]; then cp xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}.out  out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+if [ 'terminateReason = "found primal feasible solution";'  == "$(echo $string)"  ]; then echo 'terminateReason = "primal feasible jump detected";' >   $HOME/workdir/out_dphi/f7l_dext${dphi}_Dmin${D0}.out ;fi
+#HERE
+
+if [ 'terminateReason = "found dual feasible solution";'  == "$(echo $string)"  ]
+then         
+  x=$(< Counter)
+  y=$(($x + 1))
+  echo $y > Counter
+fi
+
+
+if [ 'terminateReason = "found primal-dual optimal solution";'  == "$(echo $string)"  ]
+then   
+  x=$(< Counter)
+  y=$(($x + 1))
+  echo $y > Counter
+fi
+
+
+if [ 'terminateReason = "primal feasible jump detected";'  == "$(echo $string)"  ]
+then        
+  x=$(< Counter)
+  y=$(($x + 1))
+  echo $y > Counter
+fi
+
+
+
+#UNCOMMENT THE LINE BELOW TO RUN A DELAUNAY TRIANGULATION
+#./test.sh |& tee -a TheJobSubmissionOutputs.txt
+
+
+
+
+
+#put this in new bash script if it doesnt work
+#c=$(< Counter)
+#if [ '10' == "$(echo $c)" ]
+#then 
+#  module unload python/2.7.9
+#  module load python/3.6.4
+#  python $HOME/workdir/workdir2/PARALLEL_XML/boundary_point_2d.py  $HOME/f/workdir2/PARALLEL_XML/out_dphi --write
+#  python $HOME/workdir/workdir2/PARALLEL_XML/delaunay_2d2.py  $HOME/workdir/workdir2/PARALLEL_XML/out_dphi
+#  echo 0 > $HOME/workdir/workdir2/PARALLEL_XML/Counter
+ # module unload python/3.6.4
+ # module load python/2.7.9
+
+#fi
+
+
+#REUSE THE BELOW !!!!
+
+#rm -r /scratch/dtsiakoulias/grid_auto/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}
+#rm -r /scratch/dtsiakoulias/grid_auto/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}_new
+#rm /scratch/dtsiakoulias/grid_auto/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}.xml
+#rm -r /scratch/dtsiakoulias/grid_auto/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}.ck
+#rm /scratch/dtsiakoulias/grid_auto/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}.ck.bk
+
+#THIS LINE IS FOR HOT STARTING
+mkdir /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/checkpoints
+mv /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}.ck/* /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/checkpoints/
+rm -r /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}
+
+
