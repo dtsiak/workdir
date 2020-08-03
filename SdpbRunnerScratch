@@ -47,7 +47,7 @@ mkdir /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml
 mkdir /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}.ck
 cp /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/checkpoints/* /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}.ck/
 
-mpirun  $HOME/sdpb/sdpb/sdpb/build/sdpb -o /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out --noFinalCheckpoint --maxRuntime=999986400 --precision=1100  --detectPrimalFeasibleJump --findDualFeasible --dualErrorThreshold=1e-15 --procsPerNode=20 -s  /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}
+mpirun  $HOME/sdpb/sdpb/sdpb/build/sdpb -o /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out --noFinalCheckpoint --maxRuntime=999986400 --precision=1000  --detectPrimalFeasibleJump --findDualFeasible --dualErrorThreshold=1e-15 --procsPerNode=20 -s  /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}_${D0}_${dimY}/build/bin/Cubic_phi-S_mixed_Y_grid-dext${dphi}-dS${D0}-Dmin${dimY}
 
 echo ${dphi}_${D0}_${dimY} >> $HOME/workdir/OUTPUTS/output_${dphi}
 head -1 /scratch/dtsiakoulias/grid_auto6/xml_ck_out_${dphi}/xml_ck_out_${dphi}/xml_ck_out_${dphi}_${D0}/xml_ck_out_${dphi}_${D0}_${dimY}.out/out.txt >> $HOME/workdir/OUTPUTS/output_${dphi}
