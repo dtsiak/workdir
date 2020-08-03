@@ -14,11 +14,11 @@ import subprocess
 
 #sys.path.append('/home/dtsiakoulias/.local/lib/python3.6/site-packages')
 #sys.path.append('/export/local/python-3.6.4/lib/python3.6/site-packages')
-sys.path.append('/home/dtsiakoulias/.local/bin')
-sys.path.append('/usr/local/python-2.7/lib/python2.7/site-packages')
+#sys.path.append('/home/dtsiakoulias/.local/bin')
+#sys.path.append('/usr/local/python-2.7/lib/python2.7/site-packages')
 #sys.path.append('/home/dtsiakoulias/PyCFTbootPARALLEL/pycftboot')
-sys.path.append('/home/dtsiakoulias/.local/lib/python2.7/site-packages')
-sys.path.append('/export/local/python-2.7/lib/python2.7/site-packages')
+#sys.path.append('/home/dtsiakoulias/.local/lib/python2.7/site-packages')
+#sys.path.append('/export/local/python-2.7/lib/python2.7/site-packages')
 
 # Required argument is the directory
 import scipy.spatial as scisp
