@@ -77,7 +77,7 @@ BootstrapEquation create(const Context& c, const dict<rational>& deltas, uint32_
 		// {beta[v, v, op][1]}
 		Sector s("(i[-1], odd)", 1, ContinuousType);
 		for (const auto& spin : spins)
-			if (spin % 2 == 1 && spin >= 3) s.add_op(spin);
+			if (spin % 2 == 1 ) s.add_op(spin);
 		secs.push_back(s);
 	}
 	{
